@@ -1,7 +1,19 @@
-# Paint Hard Mode
+# Pain-T
 
-A harder fork of Paint. The rules below are Paint's own until the changes planned in the fork's
-roadmap land.
+A harder fork of Paint. What it changes so far:
+
+- The canvas starts at 5x5 pixels (`starting_canvas: half` keeps Paint's start), and width and height steps go down
+  to 5 pixels.
+- Checks start every 0.0001% of similarity up to 0.001%, then every 0.001% up to 0.01%, then every 0.01% by default.
+- Color starts at black and white, 0 and 255 in each of red, green and blue (`starting_color_depth` gives free
+  items). Each Progressive Color Depth item adds one shade, so a channel takes 254 to reach all 256
+  (`color_depth_items` takes 7 to 254; with fewer, most of the new shades come with the last few).
+- The 5x5 start has 25 Matched Pixels checks, one for each pixel painted at least as close to the goal as
+  black or white would be.
+- Once 26 Additional Palette Colors have filled the palette, the filler is Overclock, which speeds up auto copy once
+  that arrives.
+
+The rest of this page is Paint's own description.
 
 ## Where is the options page?
 

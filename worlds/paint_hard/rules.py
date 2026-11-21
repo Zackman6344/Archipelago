@@ -1,5 +1,5 @@
-from itertools import product
-from math import sqrt
+from functools import lru_cache
+from math import floor, sqrt
 from typing import TYPE_CHECKING
 
 from BaseClasses import CollectionState
@@ -7,25 +7,45 @@ from BaseClasses import CollectionState
 if TYPE_CHECKING:
     from . import PaintHardWorld
 
-
-# There are only 512 (8**3) possible sets of arguments when each of r, g and b can be from 0 inclusive to 7 inclusive,
-# so pre-calculate them.
-def _make_single_pixel_score_lookup():
-    """
-    Create a lookup for the maximum possible score for a pixel in the worst case, for r, g and b color depth from 0-7
-    inclusive.
-    """
-    # The color depth calculation is the same for r, g and b, so can be calculated once for each possible input value.
-    color_depth = {i: (2 ** (7 - i) - 1) ** 2 for i in range(8)}
-    return {
-        (r, g, b): 1 - sqrt(
-            (color_depth[r] + color_depth[g] + color_depth[b]) * 12
-        ) / 765
-        for r, g, b in product(range(8), repeat=3)
-    }
+CURVE = 2.0  # 1.0 would spread new shades evenly over the items; 2.0 keeps colors coarse longer and sharpens late
+NO_PICK_COLOR_ERROR = 31  # Paint assumes 2 bits at most without Pick Color: a worst error of 31 per channel
 
 
-SINGLE_PIXEL_SCORE_LOOKUP = _make_single_pixel_score_lookup()
+def round_half_up(x: float) -> int:
+    # Python's round() sends halves to even and JS Math.round() sends them up. Both sides use this one.
+    return floor(x + 0.5)
+
+
+@lru_cache(maxsize=None)
+def shade_counts(items: int, curve: float = CURVE) -> tuple[int, ...]:
+    """Shades per channel after k Progressive Color Depth items, k = 0 to items. Grows from 2 to 256 along
+    2 * 128 ** ((k / items) ** curve), and every item adds at least one shade. slot_data carries this table, so the
+    client never recomputes it."""
+    counts = [2]
+    for k in range(1, items + 1):
+        counts.append(min(256, max(counts[-1] + 1, round_half_up(2 * 128 ** ((k / items) ** curve)))))
+    return tuple(counts)
+
+
+def quantize(value: int, shades: int) -> int:
+    """The nearest of `shades` evenly spaced values from 0 to 255. The client's src/shades.js matches it exactly."""
+    index = round_half_up(value * (shades - 1) / 255)
+    return round_half_up(index * 255 / (shades - 1))
+
+
+@lru_cache(maxsize=None)
+def worst_error(shades: int) -> int:
+    return max(abs(v - quantize(v, shades)) for v in range(256))
+
+
+def no_pick_color_cap(counts: tuple[int, ...]) -> int:
+    """The last item count still no better than Paint's 2 bits, which logic assumes without Pick Color."""
+    return max(k for k, shades in enumerate(counts) if worst_error(shades) >= NO_PICK_COLOR_ERROR)
+
+
+def pixel_score(red_error: int, green_error: int, blue_error: int) -> float:
+    """Worst-case score of one pixel on the client's scale, where a perfect pixel is 1."""
+    return 1 - 2 * sqrt((red_error ** 2 + green_error ** 2 + blue_error ** 2) / 3) / 255
 
 
 def paint_percent_available(state: CollectionState, world: "PaintHardWorld", player: int) -> bool:
@@ -36,25 +56,15 @@ def paint_percent_available(state: CollectionState, world: "PaintHardWorld", pla
 
 
 def calculate_paint_percent_available(state: CollectionState, world: "PaintHardWorld", player: int) -> float:
-    p = state.has("Pick Color", player)
-    r = state.count("Progressive Color Depth (Red)", player)
-    g = state.count("Progressive Color Depth (Green)", player)
-    b = state.count("Progressive Color Depth (Blue)", player)
-    if not p:
-        r = min(r, 2)
-        g = min(g, 2)
-        b = min(b, 2)
-    else:
-        r = min(r, 7)
-        g = min(g, 7)
-        b = min(b, 7)
+    counts = world.shade_counts
+    cap = len(counts) - 1 if state.has("Pick Color", player) else world.no_pick_color_cap
+    errors = [worst_error(counts[min(state.count(f"Progressive Color Depth ({color})", player), cap)])
+              for color in ("Red", "Green", "Blue")]
     w = state.count("Progressive Canvas Width", player)
     h = state.count("Progressive Canvas Height", player)
-    # This code calculates the total similarity in logic using the formula:
-    # (expected score per pixel) * (pixels currently available) * (logic percent from options) / (total pixel count)
-    # The expected score and logic percent per pixel are calculated elsewhere for efficiency.
-    # 6 decimals, where Paint rounds to 3: the first checks are 0.0001% apart.
-    return round(SINGLE_PIXEL_SCORE_LOOKUP[r, g, b] *
+    # (worst score per pixel) * (pixels unlocked) * (logic percent) / (total pixels), to 6 decimals where Paint
+    # rounds to 3: the first checks are 0.0001% apart.
+    return round(pixel_score(*errors) *
             min(world.start_width + w * world.options.canvas_width_increment.value, world.final_width) *
             min(world.start_height + h * world.options.canvas_height_increment.value, world.final_height) *
             world.per_pixel_logic_percent, ndigits=6)

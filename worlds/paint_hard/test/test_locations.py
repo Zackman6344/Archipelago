@@ -22,20 +22,44 @@ class CountsLocations:
         self.assertEqual(self.expected, len(self.multiworld.get_locations(self.player)))
 
 
+# 14 color items with 1 free keep every layout's items within its locations; the default 254 needs 790 non-filler
+# items. The 5x5 start adds its 25 Matched Pixels checks to every count.
 for (logic, spacing), count in EXPECTED.items():
     name = f"TestLogic{logic}{spacing}Spacing"
     globals()[name] = type(name, (CountsLocations, PaintHardTestBase),
-                           {"options": {"logic_percent": logic, **SPACINGS[spacing]}, "expected": count})
+                           {"options": {"logic_percent": logic, "color_depth_items": 14, "starting_color_depth": 1,
+                                        **SPACINGS[spacing]},
+                            "expected": count + 25})
 
 
 class TestTinyStart(PaintHardTestBase):
     options = {"starting_canvas": "tiny"}
 
-    def test_start_reaches_eleven_early_checks(self) -> None:
-        # A 5x5 canvas at the free color depth is worth 0.0021% in logic: 0.0001% to 0.001%, and 0.002%.
+    def test_start_reaches_only_the_matched_pixels(self) -> None:
+        # At black and white a 5x5 canvas is worth 0.000016% in logic, under the first similarity check.
         reachable = self.multiworld.get_reachable_locations(CollectionState(self.multiworld), self.player)
-        self.assertEqual(11, len(reachable))
+        self.assertEqual(sorted(f"Matched Pixels: {n}" for n in range(1, 26)),
+                         sorted(location.name for location in reachable))
 
     def test_slot_data_carries_the_start(self) -> None:
         slot_data = self.world.fill_slot_data()
-        self.assertEqual((5, 5), (slot_data["start_width"], slot_data["start_height"]))
+        self.assertEqual((5, 5, 25),
+                         (slot_data["start_width"], slot_data["start_height"], slot_data["matched_pixels"]))
+
+
+class TestTinyStartWithOneShade(PaintHardTestBase):
+    options = {"starting_canvas": "tiny", "starting_color_depth": 1}
+
+    def test_start_adds_eleven_early_checks(self) -> None:
+        # 1 free item per channel makes a 5x5 canvas worth 0.0021%: 0.0001% to 0.001%, and 0.002%.
+        reachable = self.multiworld.get_reachable_locations(CollectionState(self.multiworld), self.player)
+        self.assertEqual(25 + 11, len(reachable))
+
+
+class TestHalfStart(PaintHardTestBase):
+    options = {"starting_canvas": "half"}
+
+    def test_no_matched_pixels(self) -> None:
+        names = [location.name for location in self.multiworld.get_locations(self.player)]
+        self.assertFalse([name for name in names if name.startswith("Matched Pixels")])
+        self.assertEqual(0, self.world.fill_slot_data()["matched_pixels"])

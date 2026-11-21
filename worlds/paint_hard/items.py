@@ -4,7 +4,7 @@ from BaseClasses import Item, ItemClassification
 
 
 class PaintItem(Item):
-    game = "Paint Hard Mode"
+    game = "Pain-T"
 
 
 class PaintItemData(NamedTuple):

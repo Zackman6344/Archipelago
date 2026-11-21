@@ -78,6 +78,26 @@ class StartingCanvas(Choice):
     default = 0
 
 
+class ColorDepthItems(Range):
+    """Sets how many Progressive Color Depth items each of red, green and blue takes to go from 2 shades to all 256.
+    At 254, the most, every item adds exactly one shade. With fewer, most of the new shades come with the last few
+    items. Paint takes 7."""
+    display_name = "Color Depth Items"
+    range_start = 7
+    range_end = 254
+    default = 254
+
+
+class StartingColorDepth(Range):
+    """Sets how many Progressive Color Depth items of each color you start with. 0 starts every channel at black and
+    white (0 and 255), so 8 colors in all. 1 gives 3 shades per channel (0, 128 and 255), about what Paint starts
+    with."""
+    display_name = "Starting Color Depth"
+    range_start = 0
+    range_end = 3
+    default = 0
+
+
 class CanvasSizeIncrement(Removed):
     """Sets the number of pixels the canvas will expand for each width/height item received.
     Ensure an adequate number of locations are generated if setting this below 50."""
@@ -200,6 +220,8 @@ class PaintOptions(PerGameCommonOptions):
     twentieth_percent_checks: TwentiethPercentChecks
     hundredth_percent_checks: HundredthPercentChecks
     starting_canvas: StartingCanvas
+    color_depth_items: ColorDepthItems
+    starting_color_depth: StartingColorDepth
     canvas_size_increment: CanvasSizeIncrement
     canvas_width_increment: CanvasWidthIncrement
     canvas_height_increment: CanvasHeightIncrement
