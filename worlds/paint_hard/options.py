@@ -8,7 +8,7 @@ class LogicPercent(Range):
     Higher values are more difficult and items/locations will not be generated beyond this number."""
     display_name = "Logic Percent"
     range_start = 50
-    range_end = 95
+    range_end = 99
     default = 80
 
 
@@ -18,27 +18,64 @@ class GoalPercent(Range):
     reaching goal will be in logic upon obtaining all progression items."""
     display_name = "Goal Percent"
     range_start = 50
-    range_end = 95
+    range_end = 99
     default = 80
 
 
 class HalfPercentChecks(Range):
-    """Sets the lowest percent at which locations will be created for each 0.5% of similarity.
-    Below this number, there will be a check every 1%.
-    Above this number, there will be a check every 0.5%."""
+    """Sets the lowest percent above which there is a check every 0.5% of similarity.
+    Below every tier's start there is a check every 1%. Where several tiers have started, the finest one sets the
+    spacing. 100 turns this tier off."""
     display_name = "Half Percent Checks"
     range_start = 0
-    range_end = 95
+    range_end = 100
     default = 50
 
 
 class QuarterPercentChecks(Range):
-    """Sets the lowest percent at which locations will be created for each 0.25% of similarity.
-    This number will override Half Percent Checks if it is lower."""
+    """Sets the lowest percent above which there is a check every 0.25% of similarity.
+    Where several tiers have started, the finest one sets the spacing. 100 turns this tier off."""
     display_name = "Quarter Percent Checks"
     range_start = 0
-    range_end = 95
+    range_end = 100
     default = 70
+
+
+class TenthPercentChecks(Range):
+    """Sets the lowest percent above which there is a check every 0.1% of similarity.
+    Where several tiers have started, the finest one sets the spacing. 100 turns this tier off."""
+    display_name = "Tenth Percent Checks"
+    range_start = 0
+    range_end = 100
+    default = 100
+
+
+class TwentiethPercentChecks(Range):
+    """Sets the lowest percent above which there is a check every 0.05% of similarity.
+    Where several tiers have started, the finest one sets the spacing. 100 turns this tier off."""
+    display_name = "Twentieth Percent Checks"
+    range_start = 0
+    range_end = 100
+    default = 100
+
+
+class HundredthPercentChecks(Range):
+    """Sets the lowest percent above which there is a check every 0.01% of similarity.
+    Where several tiers have started, the finest one sets the spacing. 100 turns this tier off.
+    Below 0.01% there are always 18 more checks: every 0.0001% up to 0.001%, then every 0.001%."""
+    display_name = "Hundredth Percent Checks"
+    range_start = 0
+    range_end = 100
+    default = 0
+
+
+class StartingCanvas(Choice):
+    """Sets the size of your canvas before any width or height items.
+    Tiny is 5x5 pixels. Half is half the final width and height, as in Paint (400x300 for a fullscreen image)."""
+    display_name = "Starting Canvas"
+    option_tiny = 0
+    option_half = 1
+    default = 0
 
 
 class CanvasSizeIncrement(Removed):
@@ -49,10 +86,11 @@ class CanvasSizeIncrement(Removed):
 
 class CanvasWidthIncrement(Choice):
     """Sets the number of pixels the canvas will expand for each width item received.
-    Ensure an adequate number of locations are generated if setting this below 50."""
+    Small steps mean many items: from a tiny start on a fullscreen image, 5 pixels makes 159 width items."""
     display_name = "Canvas Width Increment"
-    # option_10 = 10
-    # option_20 = 20
+    option_5 = 5
+    option_10 = 10
+    option_20 = 20
     option_25 = 25
     option_50 = 50
     option_100 = 100
@@ -61,10 +99,11 @@ class CanvasWidthIncrement(Choice):
 
 class CanvasHeightIncrement(Choice):
     """Sets the number of pixels the canvas will expand for each height item received.
-    Ensure an adequate number of locations are generated if setting this below 50."""
+    Small steps mean many items: from a tiny start on a fullscreen image, 5 pixels makes 119 height items."""
     display_name = "Canvas Height Increment"
-    # option_10 = 10
-    # option_20 = 20
+    option_5 = 5
+    option_10 = 10
+    option_20 = 20
     option_25 = 25
     option_50 = 50
     option_100 = 100
@@ -141,12 +180,26 @@ class DeathLink(Toggle):
     display_name = "Death Link"
 
 
+class OverclockSeconds(Range):
+    """Sets how many seconds of double auto copy speed each Overclock gives. Overclock is the filler once 26
+    Additional Palette Colors have filled the palette. 0 makes it do nothing. Auto copy arrives in a later version,
+    and until then Overclock does nothing either."""
+    display_name = "Overclock Seconds"
+    range_start = 0
+    range_end = 120
+    default = 5
+
+
 @dataclass
 class PaintOptions(PerGameCommonOptions):
     logic_percent: LogicPercent
     goal_percent: GoalPercent
     half_percent_checks: HalfPercentChecks
     quarter_percent_checks: QuarterPercentChecks
+    tenth_percent_checks: TenthPercentChecks
+    twentieth_percent_checks: TwentiethPercentChecks
+    hundredth_percent_checks: HundredthPercentChecks
+    starting_canvas: StartingCanvas
     canvas_size_increment: CanvasSizeIncrement
     canvas_width_increment: CanvasWidthIncrement
     canvas_height_increment: CanvasHeightIncrement
@@ -157,4 +210,5 @@ class PaintOptions(PerGameCommonOptions):
     trap_blacklist: TrapBlacklist
     trap_link: TrapLink
     death_link: DeathLink
+    overclock_seconds: OverclockSeconds
     start_inventory_from_pool: StartInventoryPool

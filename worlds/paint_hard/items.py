@@ -45,6 +45,7 @@ item_data_table: Dict[str, PaintItemData] = {
     "Zoom In Trap":                     PaintItemData(2198530, ItemClassification.trap),
     "Zoom Out Trap":                    PaintItemData(2198531, ItemClassification.trap),
     "Tool Swap Trap":                   PaintItemData(2198532, ItemClassification.trap),
+    "Overclock":                        PaintItemData(2198533, ItemClassification.filler),
 }
 
 item_table = {name: data.code for name, data in item_data_table.items()}
