@@ -22,13 +22,15 @@ class CountsLocations:
         self.assertEqual(self.expected, len(self.multiworld.get_locations(self.player)))
 
 
-# 14 color items with 1 free keep every layout's items within its locations; the default 254 needs 790 non-filler
-# items. The 5x5 start adds its 25 Matched Pixels checks to every count.
+# 14 color items with 1 free keep every layout's items within its locations; the default 254 needs 838 non-filler
+# items. The tool ladders (D24) and the Overclock bank (D25) stay out, since the tightest layout, logic 50 at Paint's
+# spacing with 94 locations, can't hold their 33 items. The 5x5 start adds its 25 Matched Pixels checks to every count.
 for (logic, spacing), count in EXPECTED.items():
     name = f"TestLogic{logic}{spacing}Spacing"
     globals()[name] = type(name, (CountsLocations, PaintHardTestBase),
                            {"options": {"logic_percent": logic, "color_depth_items": 14, "starting_color_depth": 1,
-                                        **SPACINGS[spacing]},
+                                        "tool_size_ladders": False, "overclock_bank_size_items": 0,
+                                        "overclock_fill_speed_items": 0, **SPACINGS[spacing]},
                             "expected": count + 25})
 
 

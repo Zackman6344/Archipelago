@@ -10,8 +10,30 @@ A harder fork of Paint. What it changes so far:
   (`color_depth_items` takes 7 to 254; with fewer, most of the new shades come with the last few).
 - The 5x5 start has 25 Matched Pixels checks, one for each pixel painted at least as close to the goal as
   black or white would be.
-- Once 26 Additional Palette Colors have filled the palette, the filler is Overclock, which speeds up auto copy once
-  that arrives.
+- Auto copy, the Copy Goal macro, is built into the client. Press M over a pixel of the goal or of your canvas to
+  copy it, hold M to paint as you move, and press Shift+M to start or pause auto copy, which works through the canvas
+  by itself. Extras > Auto Copy opens its panel, with Start and the speed buttons. It starts at 1 pixel a second, and
+  each of 10 Progressive Auto Copy Speed items doubles that, to 1,024. The panel picks any speed up to yours, and M
+  copies from the same pixels a second.
+- Pick Color, Difference Mode and Similarity Mode each come as two Progressive items, and the first copy unlocks the
+  tool or the view. With the second Similarity Mode, holding M no longer pauses auto copy: M copies from its own pixels
+  a second, into the same undo step. The second Pick Color and Difference Mode have no effect yet; a later version
+  gives them auto copy modes.
+- Every painting tool starts one pixel wide. The Brush's sizes and shapes, the Eraser's and Airbrush's sizes, the line
+  width that Line, Curve and the shapes share, and each shape's fill come as Progressive items of their own, each
+  copy unlocking the next part of the tool's option box, smallest first. The plus and minus keys pick any size from 1
+  pixel up to what you've unlocked, and the Pencil stays one pixel wide. Clear Image, its trap, a DeathLink reset and
+  each new strip of canvas fill with white rather than the background color. `tool_size_ladders: false` turns all of
+  this off.
+- Ctrl+W (Ctrl+Alt+W in a browser tab) no longer opens Stretch and Skew, which Archipelago Paint's Image menu already
+  leaves out. It could scale a small copy of the goal over the whole canvas.
+- Once 26 Additional Palette Colors have filled the palette, the filler is Overclock. Each one banks
+  `overclock_seconds` (5 by default) of double auto copy speed, spent only while auto copy runs.
+- The Overclock bank also fills by itself while you're connected. Each Progressive Overclock Bank Size lets it hold
+  `overclock_bank_size_step` more seconds (120 by default), and each Progressive Overclock Fill Speed fills it
+  `overclock_fill_speed_step` seconds a minute faster (2 by default); `overclock_bank_size_items` and
+  `overclock_fill_speed_items` (5 each by default) set how many of each are in the pool. Overclock fillers go on top,
+  and auto copy spends the bank's own seconds first.
 
 The rest of this page is Paint's own description.
 

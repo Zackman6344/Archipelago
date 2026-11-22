@@ -1,6 +1,7 @@
 import json
 import pathlib
 import unittest
+from unittest import mock
 
 from BaseClasses import CollectionState
 from Options import OptionError
@@ -72,7 +73,7 @@ class TestBlackAndWhiteStart(PaintHardTestBase):
 
 class TestTooFewLocationsRefused(PaintHardTestBase):
     auto_construct = False
-    options = {"hundredth_percent_checks": 100}  # Paint's spacing: 174 locations for 790 non-filler items
+    options = {"hundredth_percent_checks": 100}  # Paint's spacing: 174 locations for 838 non-filler items
 
     def test_generation_is_refused(self) -> None:
         with self.assertRaises(OptionError):
@@ -82,18 +83,42 @@ class TestTooFewLocationsRefused(PaintHardTestBase):
 class TestNearFullSoloPoolRefused(PaintHardTestBase):
     auto_construct = False
     # Paint's spacing at logic 80: 174 locations for 159 progression items, 15 spare. Pools this full failed to fill.
+    # The item count refuses it first: the pool holds 28 useful items beyond its progression (51 with the tool ladders,
+    # more with the Overclock bank), so the solo guard's 25 spare can't bind until task 5.2 makes speed copies progression.
     options = {"hundredth_percent_checks": 100, "color_depth_items": 48}
 
     def test_generation_is_refused(self) -> None:
-        with self.assertRaises(OptionError):
+        with self.assertRaisesRegex(OptionError, "174 locations for 220 required items"):
             self.world_setup()
 
 
 class TestSoloPoolWithEnoughRoom(PaintHardTestBase):
-    run_default_tests = False  # the review filled this size on 20 of 20 seeds; here the guard just has to let it by
-    options = {"hundredth_percent_checks": 100, "color_depth_items": 44}  # 147 progression items, 27 spare
+    run_default_tests = False  # the review filled 44 on 20 of 20 seeds; here the guard just has to let it by
+    # 144 progression items, 30 spare. 44 no longer fits Paint's 174 locations once the 10 speed copies and the 5
+    # ladder copies (D23) join the pool: 175 items. The tool ladders (D24) would add 23 more, so they stay off here.
+    options = {"hundredth_percent_checks": 100, "color_depth_items": 43, "tool_size_ladders": False,
+               "overclock_bank_size_items": 0, "overclock_fill_speed_items": 0}  # and the Overclock bank's 10 (D25)
 
     def test_generation_is_allowed(self) -> None:
+        self.assertEqual(174, len(self.multiworld.get_locations(self.player)))
+
+
+class TestSoloGuardCounts(PaintHardTestBase):
+    auto_construct = False
+    run_default_tests = False
+    # TestSoloPoolWithEnoughRoom's pool: 144 progression items in 174 locations, 30 spare. The guard can't bind at its
+    # own 25 while the item count refuses fuller pools first (D12), so these move its threshold around 30 to show it
+    # still counts right, with the second Progressive Pick Color useful.
+    options = TestSoloPoolWithEnoughRoom.options
+
+    def test_refuses_below_its_threshold(self) -> None:
+        with mock.patch("worlds.paint_hard.SOLO_SPARE_LOCATIONS", 31):
+            with self.assertRaisesRegex(OptionError, "leaves 30 locations beyond its 144 progression items"):
+                self.world_setup()
+
+    def test_allows_at_its_threshold(self) -> None:
+        with mock.patch("worlds.paint_hard.SOLO_SPARE_LOCATIONS", 30):
+            self.world_setup()
         self.assertEqual(174, len(self.multiworld.get_locations(self.player)))
 
 

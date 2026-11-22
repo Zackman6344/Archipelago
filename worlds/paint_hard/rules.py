@@ -57,7 +57,7 @@ def paint_percent_available(state: CollectionState, world: "PaintHardWorld", pla
 
 def calculate_paint_percent_available(state: CollectionState, world: "PaintHardWorld", player: int) -> float:
     counts = world.shade_counts
-    cap = len(counts) - 1 if state.has("Pick Color", player) else world.no_pick_color_cap
+    cap = len(counts) - 1 if state.has("Progressive Pick Color", player) else world.no_pick_color_cap
     errors = [worst_error(counts[min(state.count(f"Progressive Color Depth ({color})", player), cap)])
               for color in ("Red", "Green", "Blue")]
     w = state.count("Progressive Canvas Width", player)

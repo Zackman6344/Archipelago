@@ -14,6 +14,16 @@ PALETTE_COLORS = 26  # Additional Palette Colors that bring the black-and-white 
 # 46-48 color items (15-21 spare) failed to fill, and 44-45 (24-27 spare) filled on 20 of 20 seeds. The solo walk
 # planned as task 5.3 replaces this count.
 SOLO_SPARE_LOCATIONS = 25
+# Progressive Auto Copy Speed copies: 1 pixel a second doubled 10 times, 1,024 at the top (D5). Goals past
+# 22.1 megapixels get more once goal sizes come from the YAML (D19).
+SPEED_ITEMS = 10
+# Two-copy ladders (D23): the first copy unlocks the tool or view, the second gives auto copy a mode.
+LADDERS = ["Progressive Pick Color", "Progressive Difference Mode", "Progressive Similarity Mode"]
+# Tool ladders (D24) and their copies. Every painting tool starts one pixel wide, and each copy unlocks the next part
+# of its option box in the client, smallest first. All useful: logic doesn't time hand painting.
+TOOL_LADDERS = {"Progressive Brush Size": 2, "Progressive Brush Shape": 2, "Progressive Eraser Size": 4,
+                "Progressive Airbrush Size": 3, "Progressive Line Width": 4, "Progressive Rectangle Fill": 2,
+                "Progressive Polygon Fill": 2, "Progressive Ellipse Fill": 2, "Progressive Rounded Rectangle Fill": 2}
 FEWER_ITEMS_HINT = ("Add checks (hundredth_percent_checks 0 makes one every 0.01%), raise logic_percent, lower "
                     "color_depth_items, or use bigger canvas steps.")
 
@@ -101,7 +111,8 @@ class PaintHardWorld(World):
                           "Rounded Rectangle"]
         self.push_precollected(self.create_item("Magnifier"))
         self.push_precollected(self.create_item(starting_tools.pop(self.options.starting_tool)))
-        items_to_create = ["Free-Form Select", "Select", "Fill With Color", "Pick Color", "Text", "Curve", "Polygon"]
+        items_to_create = ["Free-Form Select", "Select", "Fill With Color", "Text", "Curve", "Polygon"]
+        items_to_create += LADDERS * 2  # D23: two copies of each
         items_to_create += starting_tools
         items_to_create += ["Progressive Canvas Width"] * ceil((self.final_width - self.start_width) /
                                                                self.options.canvas_width_increment)
@@ -113,13 +124,31 @@ class PaintHardWorld(World):
             for _ in range(self.options.starting_color_depth.value):
                 self.push_precollected(self.create_item(item))
         items_to_create += depth_items * (self.options.color_depth_items.value - self.options.starting_color_depth.value)
+        items_to_create += ["Progressive Auto Copy Speed"] * SPEED_ITEMS
+        if self.options.tool_size_ladders:
+            items_to_create += [name for name, copies in TOOL_LADDERS.items() for _ in range(copies)]
+        # The Overclock bank (D25): how many copies of each ladder the options ask for. Both are useful.
+        items_to_create += ["Progressive Overclock Bank Size"] * self.options.overclock_bank_size_items.value
+        items_to_create += ["Progressive Overclock Fill Speed"] * self.options.overclock_fill_speed_items.value
         pre_filled = len(items_to_create)
         to_fill = len(self.get_region("Canvas").locations)
         if pre_filled > to_fill:
+            ladders_hint = ""
+            if self.options.tool_size_ladders:
+                ladders_hint += f" With tool_size_ladders off, {sum(TOOL_LADDERS.values())} of them stay out."
+            bank = self.options.overclock_bank_size_items.value + self.options.overclock_fill_speed_items.value
+            if bank:
+                more = "more" if ladders_hint else "of them"
+                ladders_hint += (f" With overclock_bank_size_items and overclock_fill_speed_items at 0, {bank} {more} "
+                                 f"stay out.")
             raise OptionError(f"{self.player_name}'s Pain-T world has {to_fill} locations for {pre_filled} "
-                              f"required items. {FEWER_ITEMS_HINT}")
+                              f"required items. {FEWER_ITEMS_HINT}{ladders_hint}")
         progression = sum(1 for name in items_to_create
                           if item_data_table[name].type & ItemClassification.progression)
+        progression -= 1  # the second Progressive Pick Color is useful, below
+        # While the pool holds more useful items beyond its progression than this guard's spare (28 now, 51 with the
+        # tool ladders), the item-count check above refuses those seeds first (D12). The guard binds again once task 5.2
+        # makes speed copies progression, until the solo walk (task 5.3) replaces it.
         if self.multiworld.players == 1 and to_fill - progression < SOLO_SPARE_LOCATIONS:
             raise OptionError(f"{self.player_name}'s Pain-T world leaves {to_fill - progression} locations beyond its "
                               f"{progression} progression items, and a solo seed needs {SOLO_SPARE_LOCATIONS} to fill. "
@@ -129,7 +158,11 @@ class PaintHardWorld(World):
         self.allowed_traps = [trap for trap in traps if trap not in self.options.trap_blacklist]
         while len(items_to_create) < to_fill:
             items_to_create += [self.get_filler_item_name()]
-        self.multiworld.itempool += [self.create_item(item) for item in items_to_create]
+        pool = [self.create_item(item) for item in items_to_create]
+        # The second Progressive Pick Color only gives auto copy a mode, which logic doesn't count (D23).
+        [*_, second_pick_color] = [item for item in pool if item.name == "Progressive Pick Color"]
+        second_pick_color.classification = ItemClassification.useful
+        self.multiworld.itempool += pool
 
     def create_regions(self) -> None:
         canvas = Region("Canvas", self.player, self.multiworld)
@@ -146,11 +179,14 @@ class PaintHardWorld(World):
     def fill_slot_data(self) -> Dict[str, Any]:
         return dict(self.options.as_dict("logic_percent", "goal_percent", "death_link", "canvas_width_increment",
                                          "canvas_height_increment", "trap_blacklist", "trap_link",
-                                         "overclock_seconds"),
+                                         "overclock_seconds", "overclock_bank_size_step", "overclock_fill_speed_step"),
                     final_width=self.final_width, final_height=self.final_height,
                     start_width=self.start_width, start_height=self.start_height,
                     matched_pixels=MATCHED_PIXELS if self.tiny_start else 0,
                     shade_counts=list(self.shade_counts),
+                    auto_copy_speed_items=SPEED_ITEMS,
+                    ladders=True,  # D23: Difference and Similarity Mode wait for their first copy
+                    tool_ladders=bool(self.options.tool_size_ladders.value),  # D24: tools start one pixel wide
                     version=self.world_version.as_simple_string())
 
     def collect(self, state: CollectionState, item: Item) -> bool:

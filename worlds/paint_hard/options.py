@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 
-from Options import OptionSet, Range, PerGameCommonOptions, Removed, StartInventoryPool, Toggle, Choice, Visibility
+from Options import (OptionSet, Range, PerGameCommonOptions, Removed, StartInventoryPool, Toggle, Choice, Visibility,
+                     DefaultOnToggle)
 
 
 class LogicPercent(Range):
@@ -202,12 +203,56 @@ class DeathLink(Toggle):
 
 class OverclockSeconds(Range):
     """Sets how many seconds of double auto copy speed each Overclock gives. Overclock is the filler once 26
-    Additional Palette Colors have filled the palette. 0 makes it do nothing. Auto copy arrives in a later version,
-    and until then Overclock does nothing either."""
+    Additional Palette Colors have filled the palette. 0 makes it do nothing."""
     display_name = "Overclock Seconds"
     range_start = 0
     range_end = 120
     default = 5
+
+
+class OverclockBankSizeItems(Range):
+    """How many Progressive Overclock Bank Size items go in the pool. Each lets the Overclock bank hold another
+    Overclock Bank Size Step of double auto copy speed. The bank fills by itself while you're connected, at the speed
+    the Progressive Overclock Fill Speed items give, and Overclock fillers add on top of it. 0 means nothing fills by
+    itself."""
+    display_name = "Overclock Bank Size Items"
+    range_start = 0
+    range_end = 20
+    default = 5
+
+
+class OverclockBankSizeStep(Range):
+    """How many seconds of double speed each Progressive Overclock Bank Size lets the bank hold."""
+    display_name = "Overclock Bank Size Step"
+    range_start = 10
+    range_end = 3600
+    default = 120
+
+
+class OverclockFillSpeedItems(Range):
+    """How many Progressive Overclock Fill Speed items go in the pool. Each fills the Overclock bank faster by
+    itself, by Overclock Fill Speed Step seconds of double speed a minute, while you're connected and whether auto copy
+    runs or not. 0 means nothing fills by itself."""
+    display_name = "Overclock Fill Speed Items"
+    range_start = 0
+    range_end = 20
+    default = 5
+
+
+class OverclockFillSpeedStep(Range):
+    """How many seconds of double speed a minute each Progressive Overclock Fill Speed adds to the bank's own fill."""
+    display_name = "Overclock Fill Speed Step"
+    range_start = 1
+    range_end = 60
+    default = 2
+
+
+class ToolSizeLadders(DefaultOnToggle):
+    """Each painting tool starts one pixel wide, and its own Progressive items unlock the rest of its sizes, shapes
+    or fills, smallest first: Brush Size and Brush Shape, Eraser Size, Airbrush Size, Line Width (shared by Line, Curve
+    and the shapes) and a Fill for each shape. They add 23 useful items. Off opens every size from the start, as in
+    Paint."""
+    display_name = "Tool Size Ladders"
 
 
 @dataclass
@@ -233,4 +278,9 @@ class PaintOptions(PerGameCommonOptions):
     trap_link: TrapLink
     death_link: DeathLink
     overclock_seconds: OverclockSeconds
+    overclock_bank_size_items: OverclockBankSizeItems
+    overclock_bank_size_step: OverclockBankSizeStep
+    overclock_fill_speed_items: OverclockFillSpeedItems
+    overclock_fill_speed_step: OverclockFillSpeedStep
+    tool_size_ladders: ToolSizeLadders
     start_inventory_from_pool: StartInventoryPool
