@@ -15,10 +15,24 @@ A harder fork of Paint. What it changes so far:
   by itself. Extras > Auto Copy opens its panel, with Start and the speed buttons. It starts at 1 pixel a second, and
   each of 10 Progressive Auto Copy Speed items doubles that, to 1,024. The panel picks any speed up to yours, and M
   copies from the same pixels a second.
+- Auto copy starts at a 90% miss chance, and each of the 9 Progressive Auto Copy Accuracy items takes off 10 points. M
+  and hold M roll the same chance.
+- In each channel, a miss paints a random shade you can paint now within the miss margin of the right one, so at
+  margin 0 every miss lands right. The margin starts at 255, and each Progressive Miss Margin lowers it by
+  `miss_margin_step` (1 by default, so 255 items).
+- Auto copy, M and hold M skip a pixel that already scores at least as well as the best shade you can paint for it.
+  The comparison is exact, with a tolerance of 1 level per channel only in a browser whose canvas reads are noisy. A
+  color item can reopen settled pixels.
+- One run of auto copy is one pass over the canvas, and the panel shows the pass, the pixels still off, the miss chance
+  and the margin. Auto Copy Loop starts each next pass by itself. It is a switch in the panel, kept for each game, and
+  while it is on, a finished run starts again when the game reopens pixels: a color or canvas item, a trap or a
+  DeathLink reset. Your own strokes, and a canvas you clear, stay as you left them until then.
 - Pick Color, Difference Mode and Similarity Mode each come as two Progressive items, and the first copy unlocks the
   tool or the view. With the second Similarity Mode, holding M no longer pauses auto copy: M copies from its own pixels
-  a second, into the same undo step. The second Pick Color and Difference Mode have no effect yet; a later version
-  gives them auto copy modes.
+  a second, into the same undo step. The second Difference Mode gives auto copy the pass order worst first, the pixels
+  furthest from the goal first, and the second Pick Color gives exact first, the pixels auto copy can make exactly
+  right at your current shades first. The panel uses the newest order you've unlocked, even one that arrived while the
+  page was closed, and can switch to the other one, once you have it, or to plain top to bottom.
 - Every painting tool starts one pixel wide. The Brush's sizes and shapes, the Eraser's and Airbrush's sizes, the line
   width that Line, Curve and the shapes share, and each shape's fill come as Progressive items of their own, each
   copy unlocking the next part of the tool's option box, smallest first. The plus and minus keys pick any size from 1

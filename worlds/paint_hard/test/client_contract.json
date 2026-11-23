@@ -10,6 +10,8 @@
   "Progressive Ellipse Fill": 2,
   "Progressive Rounded Rectangle Fill": 2
  },
+ "accuracy_items": 9,
+ "miss_margin_items": 255,
  "slot_data_keys": [
   "auto_copy_speed_items",
   "canvas_height_increment",
@@ -21,6 +23,7 @@
   "ladders",
   "logic_percent",
   "matched_pixels",
+  "miss_margin_step",
   "overclock_bank_size_step",
   "overclock_fill_speed_step",
   "overclock_seconds",
@@ -40,6 +43,7 @@
   "canvas_height_increment": 100,
   "trap_blacklist": [],
   "trap_link": 0,
+  "miss_margin_step": 1,
   "overclock_seconds": 5,
   "overclock_bank_size_step": 120,
   "overclock_fill_speed_step": 2,

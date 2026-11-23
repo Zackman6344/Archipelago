@@ -34,25 +34,27 @@ class TestToolLaddersOff(PaintHardTestBase):
 
 class TestToolLaddersNeedRoom(PaintHardTestBase):
     auto_construct = False
-    # Paint's spacing: 174 locations. 43 color items leave 172 non-filler items, and the ladders bring it to 195. The
-    # Overclock bank (D25) stays out, so the ladders alone overflow and the refusal names only them.
-    options = {"hundredth_percent_checks": 100, "color_depth_items": 43, "overclock_bank_size_items": 0,
-               "overclock_fill_speed_items": 0}
+    # Paint's spacing: 174 locations. 40 color items at miss_margin_step 255 leave 174 non-filler items, and the ladders
+    # bring it to 197. The Overclock bank (D25) stays out and the margin has one copy, so the ladders alone overflow and
+    # the refusal names only them.
+    options = {"hundredth_percent_checks": 100, "color_depth_items": 40, "miss_margin_step": 255,
+               "overclock_bank_size_items": 0, "overclock_fill_speed_items": 0}
 
     def test_refusal_names_the_option(self) -> None:
-        with self.assertRaisesRegex(OptionError, r"174 locations for 195 required items\..* With tool_size_ladders "
+        with self.assertRaisesRegex(OptionError, r"174 locations for 197 required items\..* With tool_size_ladders "
                                                  r"off, 23 of them stay out\.$") as refusal:
             self.world_setup()
         self.assertNotIn("overclock_bank_size_items", str(refusal.exception))
+        self.assertNotIn("miss_margin_step", str(refusal.exception))
 
 
 class TestBothOptionalGroupsNeedRoom(PaintHardTestBase):
     auto_construct = False
-    # The same 174 locations with the bank's defaults too: 205 items, and the refusal counts each group.
-    options = {"hundredth_percent_checks": 100, "color_depth_items": 43}
+    # The same 174 locations with the bank's defaults too: 207 items, and the refusal counts each group.
+    options = {"hundredth_percent_checks": 100, "color_depth_items": 40, "miss_margin_step": 255}
 
     def test_refusal_names_both(self) -> None:
-        with self.assertRaisesRegex(OptionError, r"174 locations for 205 required items\..* With tool_size_ladders "
+        with self.assertRaisesRegex(OptionError, r"174 locations for 207 required items\..* With tool_size_ladders "
                                                  r"off, 23 of them stay out\. With overclock_bank_size_items and "
                                                  r"overclock_fill_speed_items at 0, 10 more stay out\.$"):
             self.world_setup()

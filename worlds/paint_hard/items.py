@@ -66,6 +66,12 @@ item_data_table: Dict[str, PaintItemData] = {
     # The Overclock bank (D25): each Bank Size copy lets it hold more, each Fill Speed copy fills it faster by itself.
     "Progressive Overclock Bank Size":  PaintItemData(2198546, ItemClassification.useful),
     "Progressive Overclock Fill Speed": PaintItemData(2198547, ItemClassification.useful),
+    # Misses, margin and passes (D7): each Accuracy copy takes 10 points off the 90% miss chance, each Miss Margin copy
+    # lowers the miss margin from 255 by miss_margin_step, and Loop starts each next pass by itself. All three are
+    # useful until auto copy enters logic (D8), as the speed copies are; of the three, D8 counts only accuracy.
+    "Progressive Auto Copy Accuracy":   PaintItemData(2198548, ItemClassification.useful),
+    "Progressive Miss Margin":          PaintItemData(2198549, ItemClassification.useful),
+    "Auto Copy Loop":                   PaintItemData(2198550, ItemClassification.useful),
 }
 
 item_table = {name: data.code for name, data in item_data_table.items()}

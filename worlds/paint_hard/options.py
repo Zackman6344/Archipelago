@@ -201,6 +201,16 @@ class DeathLink(Toggle):
     display_name = "Death Link"
 
 
+class MissMarginStep(Range):
+    """How much each Progressive Miss Margin lowers the miss margin. A miss by auto copy or M paints each channel a
+    random shade you can paint now, within the margin of the right one. The margin starts at 255, and the last copy
+    brings it to 0, so 1 puts 255 items in the pool, 5 puts 51 and 255 puts one. A seed with few checks can raise it."""
+    display_name = "Miss Margin Step"
+    range_start = 1
+    range_end = 255
+    default = 1
+
+
 class OverclockSeconds(Range):
     """Sets how many seconds of double auto copy speed each Overclock gives. Overclock is the filler once 26
     Additional Palette Colors have filled the palette. 0 makes it do nothing."""
@@ -277,6 +287,7 @@ class PaintOptions(PerGameCommonOptions):
     trap_blacklist: TrapBlacklist
     trap_link: TrapLink
     death_link: DeathLink
+    miss_margin_step: MissMarginStep
     overclock_seconds: OverclockSeconds
     overclock_bank_size_items: OverclockBankSizeItems
     overclock_bank_size_step: OverclockBankSizeStep

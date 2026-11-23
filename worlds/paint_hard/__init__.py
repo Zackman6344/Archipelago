@@ -17,6 +17,11 @@ SOLO_SPARE_LOCATIONS = 25
 # Progressive Auto Copy Speed copies: 1 pixel a second doubled 10 times, 1,024 at the top (D5). Goals past
 # 22.1 megapixels get more once goal sizes come from the YAML (D19).
 SPEED_ITEMS = 10
+# Progressive Auto Copy Accuracy copies: the miss chance starts at 90%, and each copy takes off 10 points (D5).
+ACCURACY_ITEMS = 9
+# The miss margin a seed starts at. Each Progressive Miss Margin lowers it by miss_margin_step, and the last copy
+# brings it to 0 (D7).
+MISS_MARGIN = 255
 # Two-copy ladders (D23): the first copy unlocks the tool or view, the second gives auto copy a mode.
 LADDERS = ["Progressive Pick Color", "Progressive Difference Mode", "Progressive Similarity Mode"]
 # Tool ladders (D24) and their copies. Every painting tool starts one pixel wide, and each copy unlocks the next part
@@ -26,6 +31,11 @@ TOOL_LADDERS = {"Progressive Brush Size": 2, "Progressive Brush Shape": 2, "Prog
                 "Progressive Polygon Fill": 2, "Progressive Ellipse Fill": 2, "Progressive Rounded Rectangle Fill": 2}
 FEWER_ITEMS_HINT = ("Add checks (hundredth_percent_checks 0 makes one every 0.01%), raise logic_percent, lower "
                     "color_depth_items, or use bigger canvas steps.")
+
+
+def miss_margin_items(step: int) -> int:
+    """Progressive Miss Margin copies at this miss_margin_step: the fewest that bring the margin from 255 to 0."""
+    return ceil(MISS_MARGIN / step)
 
 
 class PaintHardWebWorld(WebWorld):
@@ -125,6 +135,11 @@ class PaintHardWorld(World):
                 self.push_precollected(self.create_item(item))
         items_to_create += depth_items * (self.options.color_depth_items.value - self.options.starting_color_depth.value)
         items_to_create += ["Progressive Auto Copy Speed"] * SPEED_ITEMS
+        # Misses, margin and passes (D7), all useful.
+        margin_items = miss_margin_items(self.options.miss_margin_step.value)
+        items_to_create += ["Progressive Auto Copy Accuracy"] * ACCURACY_ITEMS
+        items_to_create += ["Progressive Miss Margin"] * margin_items
+        items_to_create += ["Auto Copy Loop"]
         if self.options.tool_size_ladders:
             items_to_create += [name for name, copies in TOOL_LADDERS.items() for _ in range(copies)]
         # The Overclock bank (D25): how many copies of each ladder the options ask for. Both are useful.
@@ -133,22 +148,33 @@ class PaintHardWorld(World):
         pre_filled = len(items_to_create)
         to_fill = len(self.get_region("Canvas").locations)
         if pre_filled > to_fill:
-            ladders_hint = ""
+            # A sentence for each optional group: the settings that leave it out, the items they save, what follows
+            groups = []
             if self.options.tool_size_ladders:
-                ladders_hint += f" With tool_size_ladders off, {sum(TOOL_LADDERS.values())} of them stay out."
+                groups.append(("tool_size_ladders off", sum(TOOL_LADDERS.values()), ""))
             bank = self.options.overclock_bank_size_items.value + self.options.overclock_fill_speed_items.value
             if bank:
-                more = "more" if ladders_hint else "of them"
-                ladders_hint += (f" With overclock_bank_size_items and overclock_fill_speed_items at 0, {bank} {more} "
-                                 f"stay out.")
+                groups.append(("overclock_bank_size_items and overclock_fill_speed_items at 0", bank, ""))
+            top_step = self.options.miss_margin_step.range_end
+            saved = margin_items - miss_margin_items(top_step)
+            if saved:
+                room = margin_items - (pre_filled - to_fill)  # the margin copies that fit with nothing else changed
+                smallest = (f", and with nothing else changed the items fit from miss_margin_step "
+                            f"{ceil(MISS_MARGIN / room)}" if room > 0 else "")
+                groups.append((f"miss_margin_step {top_step}", saved, smallest))
+            hint = "".join(f" With {settings}, {count} {'more' if n else 'of them'} "
+                           f"{'stays' if count == 1 else 'stay'} out{end}."
+                           for n, (settings, count, end) in enumerate(groups))
             raise OptionError(f"{self.player_name}'s Pain-T world has {to_fill} locations for {pre_filled} "
-                              f"required items. {FEWER_ITEMS_HINT}{ladders_hint}")
+                              f"required items. {FEWER_ITEMS_HINT}{hint}")
         progression = sum(1 for name in items_to_create
                           if item_data_table[name].type & ItemClassification.progression)
         progression -= 1  # the second Progressive Pick Color is useful, below
-        # While the pool holds more useful items beyond its progression than this guard's spare (28 now, 51 with the
-        # tool ladders), the item-count check above refuses those seeds first (D12). The guard binds again once task 5.2
-        # makes speed copies progression, until the solo walk (task 5.3) replaces it.
+        # While the pool holds more useful items beyond its progression than this guard's spare (293 at the default
+        # miss_margin_step, 316 with the tool ladders and 326 with the Overclock bank too; 39, 62 and 72 at step 255),
+        # the item-count check above refuses those seeds first (D12). Once task 5.2 makes speed and accuracy copies
+        # progression, the guard can bind again only with the tool ladders and the bank off and 3 margin copies or fewer
+        # (steps of 85 or more), until the solo walk (task 5.3) replaces it.
         if self.multiworld.players == 1 and to_fill - progression < SOLO_SPARE_LOCATIONS:
             raise OptionError(f"{self.player_name}'s Pain-T world leaves {to_fill - progression} locations beyond its "
                               f"{progression} progression items, and a solo seed needs {SOLO_SPARE_LOCATIONS} to fill. "
@@ -177,8 +203,10 @@ class PaintHardWorld(World):
         set_completion_rules(self, self.player)
 
     def fill_slot_data(self) -> Dict[str, Any]:
+        # miss_margin_step also marks a seed with D7's misses: the client plays one that has a version but no
+        # miss_margin_step as a seed from before Phase 4.
         return dict(self.options.as_dict("logic_percent", "goal_percent", "death_link", "canvas_width_increment",
-                                         "canvas_height_increment", "trap_blacklist", "trap_link",
+                                         "canvas_height_increment", "trap_blacklist", "trap_link", "miss_margin_step",
                                          "overclock_seconds", "overclock_bank_size_step", "overclock_fill_speed_step"),
                     final_width=self.final_width, final_height=self.final_height,
                     start_width=self.start_width, start_height=self.start_height,

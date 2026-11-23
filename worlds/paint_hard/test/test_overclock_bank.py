@@ -32,13 +32,16 @@ class TestOverclockBankOptions(PaintHardTestBase):
 
 class TestOverclockBankNeedsRoom(PaintHardTestBase):
     auto_construct = False
-    # Paint's spacing: 174 locations. 43 color items leave 172 non-filler items with the tool ladders off, and the
-    # bank's 10 at the defaults bring it to 182, so the bank alone overflows and the refusal names only it.
-    options = {"hundredth_percent_checks": 100, "color_depth_items": 43, "tool_size_ladders": False}
+    # Paint's spacing: 174 locations. 40 color items at miss_margin_step 255 leave 174 non-filler items with the tool
+    # ladders off, and the bank's 10 at the defaults bring it to 184. The margin has one copy, so the bank alone
+    # overflows and the refusal names only it.
+    options = {"hundredth_percent_checks": 100, "color_depth_items": 40, "miss_margin_step": 255,
+               "tool_size_ladders": False}
 
     def test_refusal_names_the_options(self) -> None:
-        with self.assertRaisesRegex(OptionError, r"174 locations for 182 required items\..* With "
+        with self.assertRaisesRegex(OptionError, r"174 locations for 184 required items\..* With "
                                                  r"overclock_bank_size_items and overclock_fill_speed_items at 0, "
                                                  r"10 of them stay out\.$") as refusal:
             self.world_setup()
         self.assertNotIn("tool_size_ladders", str(refusal.exception))
+        self.assertNotIn("miss_margin_step", str(refusal.exception))
