@@ -212,9 +212,9 @@ class OverclockSeconds(Range):
 
 class OverclockBankSizeItems(Range):
     """How many Progressive Overclock Bank Size items go in the pool. Each lets the Overclock bank hold another
-    Overclock Bank Size Step of double auto copy speed. The bank fills by itself while you're connected, at the speed
-    the Progressive Overclock Fill Speed items give, and Overclock fillers add on top of it. 0 means nothing fills by
-    itself."""
+    Overclock Bank Size Step of double auto copy speed. The bank fills by itself while you're connected and auto copy
+    isn't running, at the speed the Progressive Overclock Fill Speed items give, and Overclock fillers add on top of it.
+    0 means nothing fills by itself."""
     display_name = "Overclock Bank Size Items"
     range_start = 0
     range_end = 20
@@ -231,8 +231,8 @@ class OverclockBankSizeStep(Range):
 
 class OverclockFillSpeedItems(Range):
     """How many Progressive Overclock Fill Speed items go in the pool. Each fills the Overclock bank faster by
-    itself, by Overclock Fill Speed Step seconds of double speed a minute, while you're connected and whether auto copy
-    runs or not. 0 means nothing fills by itself."""
+    itself, by Overclock Fill Speed Step seconds of double speed a minute, while you're connected and auto copy isn't
+    running. 0 means nothing fills by itself."""
     display_name = "Overclock Fill Speed Items"
     range_start = 0
     range_end = 20

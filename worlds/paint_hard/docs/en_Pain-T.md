@@ -29,11 +29,12 @@ A harder fork of Paint. What it changes so far:
   leaves out. It could scale a small copy of the goal over the whole canvas.
 - Once 26 Additional Palette Colors have filled the palette, the filler is Overclock. Each one banks
   `overclock_seconds` (5 by default) of double auto copy speed, spent only while auto copy runs.
-- The Overclock bank also fills by itself while you're connected. Each Progressive Overclock Bank Size lets it hold
-  `overclock_bank_size_step` more seconds (120 by default), and each Progressive Overclock Fill Speed fills it
-  `overclock_fill_speed_step` seconds a minute faster (2 by default); `overclock_bank_size_items` and
-  `overclock_fill_speed_items` (5 each by default) set how many of each are in the pool. Overclock fillers go on top,
-  and auto copy spends the bank's own seconds first.
+- The Overclock bank also fills by itself while you're connected and auto copy isn't running in any tab of the game in
+  this browser: it builds up while auto copy is paused, done or not started, and auto copy spends it when you start it
+  again. Each browser keeps its own bank. Each Progressive Overclock Bank Size lets it hold `overclock_bank_size_step`
+  more seconds (120 by default), and each Progressive Overclock Fill Speed fills it `overclock_fill_speed_step` seconds
+  a minute faster (2 by default); `overclock_bank_size_items` and `overclock_fill_speed_items` (5 each by default) set
+  how many of each are in the pool. Overclock fillers go on top, and auto copy spends the bank's own seconds first.
 
 The rest of this page is Paint's own description.
 
