@@ -47,7 +47,9 @@ item_data_table: Dict[str, PaintItemData] = {
     "Zoom Out Trap":                    PaintItemData(2198531, ItemClassification.trap),
     "Tool Swap Trap":                   PaintItemData(2198532, ItemClassification.trap),
     "Overclock":                        PaintItemData(2198533, ItemClassification.filler),
-    # Each copy doubles auto copy's top speed, from 1 pixel a second. Useful until auto copy enters logic (D8).
+    # Each copy doubles auto copy's top speed, from 1 pixel a second. The class here is the one at
+    # auto_copy_logic_hours 0. With auto copy in logic, create_item() and create_items() make the copies that can
+    # still raise the cap progression (D8).
     "Progressive Auto Copy Speed":      PaintItemData(2198534, ItemClassification.useful),
     # Two copies each (D23): the first unlocks the view, the second gives auto copy a mode.
     "Progressive Difference Mode":      PaintItemData(2198535, ItemClassification.useful),
@@ -67,8 +69,8 @@ item_data_table: Dict[str, PaintItemData] = {
     "Progressive Overclock Bank Size":  PaintItemData(2198546, ItemClassification.useful),
     "Progressive Overclock Fill Speed": PaintItemData(2198547, ItemClassification.useful),
     # Misses, margin and passes (D7): each Accuracy copy takes 10 points off the 90% miss chance, each Miss Margin copy
-    # lowers the miss margin from 255 by miss_margin_step, and Loop starts each next pass by itself. All three are
-    # useful until auto copy enters logic (D8), as the speed copies are; of the three, D8 counts only accuracy.
+    # lowers the miss margin from 255 by miss_margin_step, and Loop starts each next pass by itself. Accuracy copies
+    # get their class as speed copies do (D8). Margin copies and Loop stay useful at every auto_copy_logic_hours.
     "Progressive Auto Copy Accuracy":   PaintItemData(2198548, ItemClassification.useful),
     "Progressive Miss Margin":          PaintItemData(2198549, ItemClassification.useful),
     "Auto Copy Loop":                   PaintItemData(2198550, ItemClassification.useful),

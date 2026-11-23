@@ -2,18 +2,14 @@ from typing import NamedTuple, Dict, Optional
 
 from BaseClasses import CollectionState, Location, Region
 
-from .rules import paint_percent_available
+from .rules import EARLY_UNITS, MATCHED_PIXELS, paint_percent_available
 
 LOCATION_BASE = 2199000  # + i, for the check at i * 0.01% similarity, i = 1 to 9900
-EARLY_BASE = 2198900  # + k, for the 18 checks below 0.01%
+EARLY_BASE = 2198900  # + k, for the 18 checks below 0.01% (EARLY_UNITS)
 MATCHED_BASE = 2198950  # + n, for "Matched Pixels: n", n = 1 to 25, which only the 5x5 start has
-MATCHED_PIXELS = 25
 # A pixel is matched when each channel is at least as close to the goal as black or white would be. Every shade table
 # has black and white, so that bar never rises and is always reachable, and these are in logic from the start: a 5x5
 # canvas at black and white is worth too little for any similarity check.
-# The checks below 0.01%, in 0.0001% steps: every 0.0001% up to 0.001%, then every 0.001%. The 0.01% check that
-# ends the ladder is the grid's first, and it always exists.
-EARLY_UNITS = (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 20, 30, 40, 50, 60, 70, 80, 90)
 
 
 class PaintLocation(Location):

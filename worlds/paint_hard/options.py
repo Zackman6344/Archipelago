@@ -201,6 +201,17 @@ class DeathLink(Toggle):
     display_name = "Death Link"
 
 
+class AutoCopyLogicHours(Range):
+    """How many hours of auto copy logic expects. Logic counts the pixels auto copy gets right in that time, at the
+    speed and accuracy items you hold, plus the starting canvas painted by hand, so on a goal whose white canvas scores
+    0% or more, as the bundled ones do, no check in logic needs more auto copy than this. 0 takes auto copy out of
+    logic: logic then expects the whole unlocked canvas painted by hand, as in Paint."""
+    display_name = "Auto Copy Logic Hours"
+    range_start = 0
+    range_end = 24
+    default = 6
+
+
 class MissMarginStep(Range):
     """How much each Progressive Miss Margin lowers the miss margin. A miss by auto copy or M paints each channel a
     random shade you can paint now, within the margin of the right one. The margin starts at 255, and the last copy
@@ -287,6 +298,7 @@ class PaintOptions(PerGameCommonOptions):
     trap_blacklist: TrapBlacklist
     trap_link: TrapLink
     death_link: DeathLink
+    auto_copy_logic_hours: AutoCopyLogicHours
     miss_margin_step: MissMarginStep
     overclock_seconds: OverclockSeconds
     overclock_bank_size_items: OverclockBankSizeItems

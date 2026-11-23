@@ -49,6 +49,17 @@ A harder fork of Paint. What it changes so far:
   more seconds (120 by default), and each Progressive Overclock Fill Speed fills it `overclock_fill_speed_step` seconds
   a minute faster (2 by default); `overclock_bank_size_items` and `overclock_fill_speed_items` (5 each by default) set
   how many of each are in the pool. Overclock fillers go on top, and auto copy spends the bank's own seconds first.
+- Logic counts on auto copy. A check is in logic once the pixels auto copy gets right in `auto_copy_logic_hours` (6 by
+  default), at the speed and accuracy items you hold, plus your starting canvas painted by hand, can reach its
+  similarity. The speed and accuracy items that can still raise that are progression, and the rest useful.
+  `auto_copy_logic_hours: 0` takes auto copy out of logic, and logic then expects the whole unlocked canvas painted by
+  hand, as in Paint. With a goal image of your own, a check in logic can need more auto copy; the setup guide says when.
+- A seed with Pain-T alone is refused before it generates when a model of Archipelago's fill, run on its logic with
+  fixed seeds, places every progression item in fewer than 3 of 5 tries. Items in your start inventory count from the
+  start. The message names single changes from a sample that pass the same check with nothing else changed, such as
+  `hundredth_percent_checks: 0` for a check every 0.01% from the start, a bigger canvas step for fewer canvas items, or
+  another `auto_copy_logic_hours`. Make one of them; when it names none, make two at once, or play the YAML beside a
+  Pain-T slot at the defaults. The setup guide lists every refusal.
 
 The rest of this page is Paint's own description.
 

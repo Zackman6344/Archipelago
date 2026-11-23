@@ -2,22 +2,37 @@ import unittest
 
 from BaseClasses import CollectionState, ItemClassification
 from Options import OptionError
+from test.general import setup_multiworld
 
 from . import PaintHardTestBase
-from .. import LADDERS, SPEED_ITEMS, miss_margin_items
+from .. import LADDERS, PaintHardWorld, miss_margin_items
+from ..items import item_data_table
 from ..options import MissMarginStep
-from ..rules import paint_percent_available
+from ..rules import BASE_SPEED_ITEMS, paint_percent_available
 
 
 class TestAutoCopySpeed(PaintHardTestBase):
     def test_speed_copies_in_the_pool(self) -> None:
         copies = [item for item in self.multiworld.itempool if item.name == "Progressive Auto Copy Speed"]
-        self.assertEqual(SPEED_ITEMS, len(copies))
-        # Useful until auto copy enters logic (D8): logic doesn't count auto copy yet.
-        self.assertTrue(all(item.classification == ItemClassification.useful for item in copies))
+        self.assertEqual(BASE_SPEED_ITEMS, len(copies))
+        # At 6 h copies 1-8 can still raise logic's cap and are progression, and 9-10 can't and are useful (D8): 8
+        # copies at a 90% miss chance get 552,960 pixels right in 6 h, past the goal's 480,000.
+        self.assertEqual([ItemClassification.progression] * 8 + [ItemClassification.useful] * 2,
+                         [item.classification for item in copies])
 
     def test_slot_data_names_the_tier_count(self) -> None:
-        self.assertEqual(SPEED_ITEMS, self.world.fill_slot_data()["auto_copy_speed_items"])
+        self.assertEqual(BASE_SPEED_ITEMS, self.world.fill_slot_data()["auto_copy_speed_items"])
+
+    def test_created_copies_are_progression(self) -> None:
+        # Archipelago makes start_inventory and start_inventory_from_pool copies with create_item (Main.py).
+        self.assertEqual([ItemClassification.progression] * 2,
+                         [self.world.create_item(name).classification
+                          for name in ("Progressive Auto Copy Speed", "Progressive Auto Copy Accuracy")])
+
+    def test_precollected_copies_count(self) -> None:
+        for _ in range(3):
+            self.multiworld.push_precollected(self.world.create_item("Progressive Auto Copy Speed"))
+        self.assertEqual(3, CollectionState(self.multiworld).count("Progressive Auto Copy Speed", self.player))
 
     def test_speed_copies_take_filler_slots(self) -> None:
         # The pool still fills every location: the speed copies replace filler, not locations.
@@ -39,12 +54,17 @@ class TestLadders(PaintHardTestBase):
         self.assertTrue(all(item.classification == ItemClassification.useful for item in views))
 
     def test_pick_color_still_lifts_the_hand_painted_cap(self) -> None:
-        # Logic's 2-bit cap on hand-painted color lifts with the first copy, as Pick Color did (D8).
+        # Logic's 2-bit cap on hand-painted color lifts with the first copy, as Pick Color did (D8). With auto copy in
+        # logic only the starting canvas is painted by hand, and only where the canvas outgrows what auto copy gets
+        # right: here the whole canvas, against the 2,160 pixels 1 pixel a second at 90% misses gets right in 6 h.
         color = self.world.options.color_depth_items.value
         base = CollectionState(self.multiworld)
         for name in ("Red", "Green", "Blue"):
             for _ in range(color):
                 base.collect(self.world.create_item(f"Progressive Color Depth ({name})"), prevent_sweep=True)
+        for name, copies in (("Progressive Canvas Width", 8), ("Progressive Canvas Height", 6)):
+            for _ in range(copies):
+                base.collect(self.world.create_item(name), prevent_sweep=True)
         before = paint_percent_available(base, self.world, self.player)
         base.collect(self.world.create_item("Progressive Pick Color"), prevent_sweep=True)
         self.assertGreater(paint_percent_available(base, self.world, self.player), before)
@@ -54,12 +74,66 @@ class TestLadders(PaintHardTestBase):
 
 
 class TestAutoCopyAccuracy(PaintHardTestBase):
-    def test_nine_useful_copies(self) -> None:
-        # The miss chance starts at 90% and each copy takes off 10 points (D5).
+    def test_nine_progression_copies(self) -> None:
+        # The miss chance starts at 90% and each copy takes off 10 points (D5). Each raises logic's cap while auto copy
+        # is in logic: at 1 pixel a second, even 8 copies get only 19,440 pixels right in 6 h.
         copies = [item for item in self.multiworld.itempool if item.name == "Progressive Auto Copy Accuracy"]
         self.assertEqual(9, len(copies))
-        # Useful until auto copy enters logic (D8), as the speed copies are.
-        self.assertTrue(all(item.classification == ItemClassification.useful for item in copies))
+        self.assertTrue(all(item.classification == ItemClassification.progression for item in copies))
+
+
+class AutoCopyClassification:
+    speed: list[ItemClassification]
+    accuracy: ItemClassification
+    created: ItemClassification  # a speed or accuracy copy from create_item, as start inventory makes them
+
+    def test_created_copies_follow_the_hours(self) -> None:
+        self.assertEqual([self.created] * 2, [self.world.create_item(name).classification
+                                              for name in ("Progressive Auto Copy Speed",
+                                                           "Progressive Auto Copy Accuracy")])
+
+    def test_classification_follows_the_hours(self) -> None:
+        speed = [item.classification for item in self.multiworld.itempool if item.name == "Progressive Auto Copy Speed"]
+        accuracy = {item.classification for item in self.multiworld.itempool
+                    if item.name == "Progressive Auto Copy Accuracy"}
+        self.assertEqual((self.speed, {self.accuracy}), (speed, accuracy))
+        self.assertEqual(self.options["auto_copy_logic_hours"], self.world.fill_slot_data()["auto_copy_logic_hours"])
+
+
+class TestAutoCopyOutOfLogic(AutoCopyClassification, PaintHardTestBase):
+    # With auto copy out of logic no copy can raise the cap, so all are useful, as before Phase 5.
+    options = {"auto_copy_logic_hours": 0}
+    speed = [ItemClassification.useful] * 10
+    accuracy = ItemClassification.useful
+    created = ItemClassification.useful
+
+
+class TestAutoCopyTwoHours(AutoCopyClassification, PaintHardTestBase):
+    # At 2 h even 9 copies at a 90% miss chance get only 368,640 pixels right, so all 10 can raise the cap.
+    options = {"auto_copy_logic_hours": 2}
+    run_default_tests = False
+    speed = [ItemClassification.progression] * 10
+    accuracy = ItemClassification.progression
+    created = ItemClassification.progression
+
+
+class TestAutoCopyDay(AutoCopyClassification, PaintHardTestBase):
+    # At 24 h 6 copies at a 90% miss chance get 552,960 pixels right, so copies 7-10 are useful.
+    options = {"auto_copy_logic_hours": 24}
+    run_default_tests = False
+    speed = [ItemClassification.progression] * 6 + [ItemClassification.useful] * 4
+    accuracy = ItemClassification.progression
+    created = ItemClassification.progression
+
+
+class TestItemLinkGroup(unittest.TestCase):
+    def test_a_group_world_makes_the_tables_class(self) -> None:
+        # MultiWorld.link_items() makes each linked copy with the group's own world, which create_group() builds
+        # without generate_early, so it has no layout.
+        group = PaintHardWorld.create_group(setup_multiworld(PaintHardWorld, ()), 2, {1})
+        names = ("Progressive Auto Copy Speed", "Progressive Auto Copy Accuracy", "Progressive Canvas Width")
+        self.assertEqual([item_data_table[name].type for name in names],
+                         [group.create_item(name).classification for name in names])
 
 
 class TestMissMargin(PaintHardTestBase):

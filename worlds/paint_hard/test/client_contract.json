@@ -13,6 +13,7 @@
  "accuracy_items": 9,
  "miss_margin_items": 255,
  "slot_data_keys": [
+  "auto_copy_logic_hours",
   "auto_copy_speed_items",
   "canvas_height_increment",
   "canvas_width_increment",
@@ -47,6 +48,7 @@
   "overclock_seconds": 5,
   "overclock_bank_size_step": 120,
   "overclock_fill_speed_step": 2,
+  "auto_copy_logic_hours": 6,
   "final_width": 800,
   "final_height": 600,
   "start_width": 5,
@@ -312,5 +314,340 @@
   "auto_copy_speed_items": 10,
   "ladders": true,
   "tool_ladders": true
+ },
+ "logic": {
+  "states": [
+   [
+    0,
+    0,
+    0,
+    0,
+    0,
+    false
+   ],
+   [
+    1,
+    0,
+    0,
+    0,
+    0,
+    false
+   ],
+   [
+    1,
+    1,
+    1,
+    0,
+    0,
+    false
+   ],
+   [
+    10,
+    2,
+    2,
+    3,
+    2,
+    false
+   ],
+   [
+    10,
+    2,
+    2,
+    3,
+    2,
+    true
+   ],
+   [
+    40,
+    3,
+    2,
+    5,
+    4,
+    true
+   ],
+   [
+    100,
+    4,
+    3,
+    6,
+    5,
+    true
+   ],
+   [
+    200,
+    8,
+    6,
+    8,
+    9,
+    true
+   ],
+   [
+    254,
+    8,
+    6,
+    10,
+    9,
+    true
+   ],
+   [
+    254,
+    8,
+    6,
+    0,
+    0,
+    true
+   ]
+  ],
+  "ceilings": {
+   "0": [
+    1.6e-05,
+    0.002075,
+    0.915147,
+    5.246258,
+    6.344951,
+    10.175637,
+    20.426029,
+    79.372549,
+    80.0,
+    80.0
+   ],
+   "1": [
+    1.6e-05,
+    0.002075,
+    0.031958,
+    1.307592,
+    1.308245,
+    9.378186,
+    20.426029,
+    79.372549,
+    80.0,
+    0.064167
+   ],
+   "2": [
+    1.6e-05,
+    0.002075,
+    0.06184,
+    2.612062,
+    2.612716,
+    10.175637,
+    20.426029,
+    79.372549,
+    80.0,
+    0.124167
+   ],
+   "6": [
+    1.6e-05,
+    0.002075,
+    0.181369,
+    6.344951,
+    6.344951,
+    10.175637,
+    20.426029,
+    79.372549,
+    80.0,
+    0.364167
+   ],
+   "24": [
+    1.6e-05,
+    0.002075,
+    0.719252,
+    6.344951,
+    6.344951,
+    10.175637,
+    20.426029,
+    79.372549,
+    80.0,
+    1.444167
+   ]
+  },
+  "half_start_ceilings": [
+   0.078431,
+   9.960784,
+   10.140078,
+   22.807216,
+   25.944471,
+   56.960784,
+   79.372549,
+   79.372549,
+   80.0,
+   20.36
+  ],
+  "past_the_top_states": [
+   [
+    254,
+    8,
+    6,
+    11,
+    0,
+    true
+   ],
+   [
+    254,
+    8,
+    6,
+    12,
+    0,
+    true
+   ],
+   [
+    200,
+    8,
+    5,
+    11,
+    0,
+    false
+   ]
+  ],
+  "past_the_top_ceilings": [
+   61.444167,
+   61.444167,
+   60.961239
+  ],
+  "more_states": [
+   [
+    254,
+    8,
+    6,
+    1,
+    0,
+    true
+   ],
+   [
+    254,
+    8,
+    6,
+    3,
+    2,
+    true
+   ]
+  ],
+  "more_ceilings": [
+   0.724167,
+   8.644167
+  ],
+  "channel_states": [
+   [
+    16,
+    13,
+    11,
+    3,
+    4,
+    5,
+    2,
+    true
+   ],
+   [
+    1,
+    2,
+    3,
+    0,
+    1,
+    0,
+    0,
+    false
+   ],
+   [
+    60,
+    30,
+    90,
+    7,
+    2,
+    3,
+    1,
+    false
+   ],
+   [
+    5,
+    80,
+    160,
+    30,
+    60,
+    6,
+    4,
+    true
+   ],
+   [
+    254,
+    100,
+    7,
+    40,
+    119,
+    10,
+    9,
+    false
+   ]
+  ],
+  "channel_ceilings": {
+   "6": [
+    19.110537,
+    0.054626,
+    5.643595,
+    72.349557,
+    74.192547
+   ],
+   "width_20_height_5": [
+    0.251404,
+    0.005202,
+    0.354978,
+    27.813129,
+    74.192547
+   ],
+   "logic_90_goal_70": [
+    21.499354,
+    0.061454,
+    6.349045,
+    81.393251,
+    83.466615
+   ],
+   "widescreen_vertical": [
+    25.480716,
+    0.072834,
+    7.524794,
+    72.349557,
+    74.192547
+   ]
+  },
+  "speed_progression": 8,
+  "accuracy_progression": 9,
+  "slot_data_changes": {
+   "0": {
+    "auto_copy_logic_hours": 0
+   },
+   "1": {
+    "auto_copy_logic_hours": 1
+   },
+   "2": {
+    "auto_copy_logic_hours": 2
+   },
+   "6": {},
+   "24": {
+    "auto_copy_logic_hours": 24
+   },
+   "half_start": {
+    "start_width": 400,
+    "start_height": 300,
+    "matched_pixels": 0
+   },
+   "starting_color_depth_1": {},
+   "width_20_height_5": {
+    "canvas_width_increment": 20,
+    "canvas_height_increment": 5
+   },
+   "logic_90_goal_70": {
+    "logic_percent": 90,
+    "goal_percent": 70
+   },
+   "widescreen_vertical": {
+    "final_width": 450,
+    "final_height": 800
+   }
+  },
+  "start_inventory": [
+   "Magnifier",
+   "Brush",
+   "Progressive Color Depth (Red)",
+   "Progressive Color Depth (Green)",
+   "Progressive Color Depth (Blue)"
+  ]
  }
 }
