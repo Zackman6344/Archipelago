@@ -49,7 +49,7 @@ item_data_table: Dict[str, PaintItemData] = {
     "Overclock":                        PaintItemData(2198533, ItemClassification.filler),
     # Each copy doubles auto copy's top speed, from 1 pixel a second. The class here is the one at
     # auto_copy_logic_hours 0. With auto copy in logic, create_item() and create_items() make the copies that can
-    # still raise the cap progression (D8).
+    # still raise the cap progression (D8), and every copy while missed_pixel_checks is above 0 (D26).
     "Progressive Auto Copy Speed":      PaintItemData(2198534, ItemClassification.useful),
     # Two copies each (D23): the first unlocks the view, the second gives auto copy a mode.
     "Progressive Difference Mode":      PaintItemData(2198535, ItemClassification.useful),
@@ -74,6 +74,9 @@ item_data_table: Dict[str, PaintItemData] = {
     "Progressive Auto Copy Accuracy":   PaintItemData(2198548, ItemClassification.useful),
     "Progressive Miss Margin":          PaintItemData(2198549, ItemClassification.useful),
     "Auto Copy Loop":                   PaintItemData(2198550, ItemClassification.useful),
+    # Happy Accident (D26) lets auto copy miss on purpose, and logic holds every Missed Pixels check until it is
+    # found. One copy, for seeds with missed_pixel_checks above 0, and progression at every auto_copy_logic_hours.
+    "Happy Accident":                   PaintItemData(2198551, ItemClassification.progression),
 }
 
 item_table = {name: data.code for name, data in item_data_table.items()}
@@ -81,3 +84,26 @@ traps = [
     "Undo Trap", "Clear Image Trap", "Invert Colors Trap", "Flip Horizontal Trap", "Flip Vertical Trap", "Help Trap",
     "Zoom In Trap", "Zoom Out Trap", "Tool Swap Trap"
 ]
+# Name groups, which a YAML's local_items, non_local_items and start_hints take in place of the names. Every item is
+# in one group but the two fillers, Additional Palette Color and Overclock: a group in local_items keeps each of its
+# items in your own world, and a seed has thousands of fillers.
+item_groups = {
+    "Canvas": {"Progressive Canvas Width", "Progressive Canvas Height"},
+    "Color Depth": {"Progressive Color Depth (Red)", "Progressive Color Depth (Green)",
+                    "Progressive Color Depth (Blue)"},
+    # The toolbox: Magnifier, the 8 starting_tool choices and the 7 others
+    "Tools": {"Magnifier", "Brush", "Pencil", "Eraser/Color Eraser", "Airbrush", "Line", "Rectangle", "Ellipse",
+              "Rounded Rectangle", "Free-Form Select", "Select", "Fill With Color", "Progressive Pick Color", "Text",
+              "Curve", "Polygon"},
+    # What tool_size_ladders puts in the pool (D24)
+    "Tool Size Ladders": {"Progressive Brush Size", "Progressive Brush Shape", "Progressive Eraser Size",
+                          "Progressive Airbrush Size", "Progressive Line Width", "Progressive Rectangle Fill",
+                          "Progressive Polygon Fill", "Progressive Ellipse Fill",
+                          "Progressive Rounded Rectangle Fill"},
+    "Views": {"Progressive Difference Mode", "Progressive Similarity Mode"},
+    # Every item that changes auto copy alone, the Overclock bank's two ladders among them
+    "Auto Copy": {"Progressive Auto Copy Speed", "Progressive Auto Copy Accuracy", "Progressive Miss Margin",
+                  "Auto Copy Loop", "Happy Accident", "Progressive Overclock Bank Size",
+                  "Progressive Overclock Fill Speed"},
+    "Traps": set(traps),
+}

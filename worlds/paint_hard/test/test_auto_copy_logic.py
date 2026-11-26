@@ -271,14 +271,15 @@ class TestTheFillCheck(unittest.TestCase):
                     self.assertEqual((locations, smallest), (world.layout.locations, len(world.non_filler_items())))
 
     def test_the_last_resort(self) -> None:
-        # The sentence a refusal ends with when no single change in its sample passes
+        # The sentence a refusal ends with when no single change in its sample passes, before the check's scope
         setup = layout(width_increment=5, height_increment=5, spacing=(50, 70, 100, 0, 100))
         with mock.patch.object(rules, "passing_changes", return_value=([], 16)):
             message = refusal("P1", setup, 1367)
         self.assertEqual("P1's Pain-T world can't be filled alone: a model of Archipelago's fill, run on its logic "
-                         "with fixed seeds, placed every progression item in 0 of 3 tries, where 3 of 5 must. None of "
-                         "a sample of 16 single changes passes it; try two at once, or play it beside a Pain-T slot at "
-                         "the defaults.", message)
+                         "with fixed seeds, has to place every progression item in 3 of 5 tries. It filled 0 of the "
+                         "first 3, and with 2 tries left it can't reach 3. None of a sample of 16 single changes "
+                         "passes the check; try two at once, or play it beside a Pain-T slot at the defaults. Beside "
+                         "other slots this check doesn't run, and Archipelago's own fill decides.", message)
 
     def test_start_inventory_from_pool_takes_progression_first(self) -> None:
         # Main.py takes a name's first copies out of the pool, which create_items() leaves progression: at 6 h 9 speed
@@ -318,7 +319,8 @@ class TestLogicCountsAutoCopy(PaintHardTestBase):
 
     def test_the_version_marks_auto_copy_in_logic(self) -> None:
         # Phase 4's seeds carry 1.0.0, and their slot data differs from Phase 5's only by auto_copy_logic_hours.
-        self.assertEqual("1.1.0", self.world.fill_slot_data()["version"])
+        # Phase 5's seeds carry 1.1.0. From 1.2.0 slot data has the goal's keys too (D17, test_goal_options.py).
+        self.assertEqual("1.2.0", self.world.fill_slot_data()["version"])
 
 
 class TestStartInventory(unittest.TestCase):

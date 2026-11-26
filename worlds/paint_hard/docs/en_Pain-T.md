@@ -51,15 +51,38 @@ A harder fork of Paint. What it changes so far:
   how many of each are in the pool. Overclock fillers go on top, and auto copy spends the bank's own seconds first.
 - Logic counts on auto copy. A check is in logic once the pixels auto copy gets right in `auto_copy_logic_hours` (6 by
   default), at the speed and accuracy items you hold, plus your starting canvas painted by hand, can reach its
-  similarity. The speed and accuracy items that can still raise that are progression, and the rest useful.
-  `auto_copy_logic_hours: 0` takes auto copy out of logic, and logic then expects the whole unlocked canvas painted by
-  hand, as in Paint. With a goal image of your own, a check in logic can need more auto copy; the setup guide says when.
+  similarity. The speed and accuracy items that can still raise that are progression, and the rest useful; every
+  speed item is progression while `missed_pixel_checks` is above 0 with auto copy in logic. `auto_copy_logic_hours: 0`
+  takes auto copy out of logic, and logic then expects the whole unlocked canvas painted by hand, as in Paint. With a
+  goal image of your own, a check in logic can need more auto copy; the setup guide says when. The Auto Copy Time and
+  Missed Pixels checks below can too.
+- The YAML can name the goal image. `goal_image` takes `default` for the bundled image, an https URL, or the path of an
+  image file in the client's own site; `goal_width` and `goal_height` give its size, from 50 to 16,384 pixels a side;
+  and `goal_image_sha256` gives its hash. The seed carries the name, the size and the hash, never the pixels. The
+  canvas items follow the size, and a goal past 22.1 megapixels gets more than 10 Progressive Auto Copy Speed items at
+  the default 6 hours: 12 at 8192x8192 and 14 at 16384x16384. `starting_canvas: half` is refused where the half start
+  passes 160,000 pixels. Until the client reads `goal_image`, it loads `images/archipelago/{width}x{height}.png` from
+  its own site at the seed's size, whatever `goal_image` names. The setup guide has each option's rules.
+- Three families of checks come beside the similarity checks, each off by default. Perfect Pixels
+  (`perfect_pixel_checks`) send as pixels of your canvas equal the goal exactly, and `perfect_pixel_items` sets what
+  they hold: `useful` takes useful items, filler and traps, `filler` takes filler and traps alone, and `any` takes
+  every item. At `useful` and at `any`, Archipelago's fill puts useful items of every game on these checks, which
+  open last, beyond their share of the locations. In a seed of 30 slots, 8 of them Pain-T in 5 px steps with every
+  family at its top, 5,462 of the 6,995 useful items sat on those 8 slots' Perfect Pixels checks, 26% of the
+  locations. With one such slot of 30, 28% to 34% of the useful items sat on its 8,182 checks, 11% of the locations.
+  Those seeds ran at `any`. Auto Copy Time (`timesanity_minutes`, `timesanity_hours`) sends a check every so many
+  minutes of auto copy's work in all. Missed Pixels (`missed_pixel_checks`) send as auto copy and M paint wrong
+  pixels, and put Happy Accident in the pool, a progression item that lets auto copy miss on purpose. While auto copy
+  is in logic, progression lands on Auto Copy Time and Missed Pixels like any other, and their last checks wait on up
+  to `timesanity_hours` of auto copy. The client doesn't send Perfect Pixels, Auto Copy Time or Missed Pixels checks
+  yet, and items on them wait for the release that does. The setup guide has each option's rules.
 - A seed with Pain-T alone is refused before it generates when a model of Archipelago's fill, run on its logic with
   fixed seeds, places every progression item in fewer than 3 of 5 tries. Items in your start inventory count from the
   start. The message names single changes from a sample that pass the same check with nothing else changed, such as
   `hundredth_percent_checks: 0` for a check every 0.01% from the start, a bigger canvas step for fewer canvas items, or
   another `auto_copy_logic_hours`. Make one of them; when it names none, make two at once, or play the YAML beside a
-  Pain-T slot at the defaults. The setup guide lists every refusal.
+  Pain-T slot at the defaults. Beside other slots this check doesn't run, and Archipelago's own fill decides. The setup
+  guide lists every refusal.
 
 The rest of this page is Paint's own description.
 

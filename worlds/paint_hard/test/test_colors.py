@@ -151,12 +151,15 @@ class TestSoloFillCheckRefuses(PaintHardTestBase):
     # (D12). Real seeds filled 0 of 3.
     options = {"canvas_width_increment": 5, "canvas_height_increment": 5, "hundredth_percent_checks": 100,
                "twentieth_percent_checks": 0, "auto_copy_logic_hours": 2}
-    # plan_math.py's refusal at 2 h, for the player this test base names Tester
+    # The refusal at 2 h, for the player this test base names Tester: plan_math.py's tries and changes, in the
+    # world's words
     message = ("Tester's Pain-T world can't be filled alone: a model of Archipelago's fill, run on its logic with "
-               "fixed seeds, placed every progression item in 0 of 3 tries, where 3 of 5 must. From a sample of 16 "
-               "single changes, these pass the same check with nothing else changed: hundredth_percent_checks 0 (a "
-               "check every 0.01% from the start); canvas_width_increment 50; canvas_height_increment 50; "
-               "canvas_width_increment and canvas_height_increment 20; auto_copy_logic_hours 0.")
+               "fixed seeds, has to place every progression item in 3 of 5 tries. It filled 0 of the first 3, and "
+               "with 2 tries left it can't reach 3. From a sample of 16 single changes, these pass the same check with "
+               "nothing else changed: hundredth_percent_checks 0 (a check every 0.01% from the start); "
+               "canvas_width_increment 50; canvas_height_increment 50; canvas_width_increment and "
+               "canvas_height_increment 20; auto_copy_logic_hours 0. Beside other slots this check doesn't run, and "
+               "Archipelago's own fill decides.")
 
     def test_the_check_refuses_and_names_what_passes(self) -> None:
         with self.assertRaises(OptionError) as refusal:
@@ -199,12 +202,14 @@ class TestSoloFillCheckNamesWhatItTried(PaintHardTestBase):
     # change it names, 20, is 20x20. The walk it replaced named both at 10 after trying 10x25, and then refused 10x10.
     options = {"starting_canvas": "half", "canvas_width_increment": 5, "canvas_height_increment": 25,
                "hundredth_percent_checks": 100, "color_depth_items": 28, "logic_percent": 99, **SMALLEST_POOL}
-    # plan_math.py's refusal for these options, for the player this test base names Tester
+    # The refusal for these options, for the player this test base names Tester: plan_math.py's tries and changes, in
+    # the world's words
     message = ("Tester's Pain-T world can't be filled alone: a model of Archipelago's fill, run on its logic with "
-               "fixed seeds, placed every progression item in 0 of 3 tries, where 3 of 5 must. From a sample of 10 "
-               "single changes, these pass the same check with nothing else changed: half_percent_checks 0 (a check "
-               "every 0.5% from the start); canvas_width_increment 10; canvas_width_increment and "
-               "canvas_height_increment 20.")
+               "fixed seeds, has to place every progression item in 3 of 5 tries. It filled 0 of the first 3, and "
+               "with 2 tries left it can't reach 3. From a sample of 10 single changes, these pass the same check with "
+               "nothing else changed: half_percent_checks 0 (a check every 0.5% from the start); "
+               "canvas_width_increment 10; canvas_width_increment and canvas_height_increment 20. Beside other slots "
+               "this check doesn't run, and Archipelago's own fill decides.")
 
     def test_the_check_refuses_and_names_what_passes(self) -> None:
         with self.assertRaises(OptionError) as refusal:
@@ -230,12 +235,15 @@ class TestSoloFillCheckNamesSeveralHours(PaintHardTestBase):
                "logic_percent": 53, "color_depth_items": 242, "starting_color_depth": 2, "auto_copy_logic_hours": 16,
                "half_percent_checks": 0, "quarter_percent_checks": 100, "tenth_percent_checks": 100,
                "twentieth_percent_checks": 0, "hundredth_percent_checks": 100, **SMALLEST_POOL}
-    # plan_math.py's refusal for these options, for the player this test base names Tester
+    # The refusal for these options, for the player this test base names Tester: plan_math.py's tries and changes, in
+    # the world's words
     message = ("Tester's Pain-T world can't be filled alone: a model of Archipelago's fill, run on its logic with "
-               "fixed seeds, placed every progression item in 1 of 4 tries, where 3 of 5 must. From a sample of 12 "
-               "single changes, these pass the same check with nothing else changed: hundredth_percent_checks 0 (a "
-               "check every 0.01% from the start); canvas_width_increment 10; canvas_width_increment and "
-               "canvas_height_increment 100; auto_copy_logic_hours 0 or 12.")
+               "fixed seeds, has to place every progression item in 3 of 5 tries. It filled 1 of the first 4, and "
+               "with 1 try left it can't reach 3. From a sample of 12 single changes, these pass the same check with "
+               "nothing else changed: hundredth_percent_checks 0 (a check every 0.01% from the start); "
+               "canvas_width_increment 10; canvas_width_increment and canvas_height_increment 100; "
+               "auto_copy_logic_hours 0 or 12. Beside other slots this check doesn't run, and Archipelago's own fill "
+               "decides.")
 
     def test_the_check_refuses_and_names_what_passes(self) -> None:
         with self.assertRaises(OptionError) as refusal:
@@ -248,10 +256,10 @@ class TestTheHostsPanicMethod(unittest.TestCase):
     # options fill 3 of 5 tries with swaps and 2 of 5 without; D12's 2 h example fills 0 of 3 either way.
     room = TestSoloPoolWithEnoughRoom.options
     raised = ("Tester1's Pain-T world can't be filled alone: a model of Archipelago's fill under the host's "
-              "panic_method raise, run on its logic with fixed seeds, placed every progression item in 2 of 5 tries, "
-              "where 3 of 5 must. From a sample of 5 single changes, these pass the same check with nothing else "
-              "changed: half_percent_checks 0 (a check every 0.5% from the start); auto_copy_logic_hours 0 or 2 or 12 "
-              "or 24.")
+              "panic_method raise, run on its logic with fixed seeds, has to place every progression item in 3 of 5 "
+              "tries. It filled 2 of the 5. From a sample of 5 single changes, these pass the same check with nothing "
+              "else changed: half_percent_checks 0 (a check every 0.5% from the start); auto_copy_logic_hours 0 or 2 "
+              "or 12 or 24. Beside other slots this check doesn't run, and Archipelago's own fill decides.")
 
     def test_these_tests_take_the_host_as_swap(self) -> None:
         # Every other test that goes through generate_early reads the host's method as Archipelago's default.
